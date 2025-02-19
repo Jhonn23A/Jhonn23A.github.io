@@ -46,6 +46,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: background 0.3s ease, box-shadow 0.3s ease;
             z-index: 999;
+            overflow: hidden;
         }
 
         .navbar.scrolled {
@@ -71,11 +72,16 @@
         .nav-links a {
             text-decoration: none;
             color: var(--text-color);
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            display: inline-block;
         }
 
-        .nav-links a:hover {
-            color: var(--primary-color);
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .nav-toggle {
@@ -112,7 +118,10 @@
             }
 
             .nav-links a {
-                padding: 1rem 0;
+                padding: 1rem;
+                width: 100%;
+                text-align: center;
+                border-radius: 5px;
             }
 
             .nav-links li {
@@ -385,7 +394,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links">
-                <li><a href="#home">Inicio</a></li>
+                <li><a href="#home" class="active">Inicio</a></li>
                 <li><a href="#about">Sobre mí</a></li>
                 <li><a href="#skills">Servicios</a></li>
                 <li><a href="#contact">Contacto</a></li>
@@ -493,25 +502,6 @@
             });
         });
 
-        // Neon Animation
-        let neonContainer = document.querySelector('.neon-container');
-        function neonWave() {
-            gsap.timeline({
-                defaults: { ease: 'power2.inOut', duration: 1 }
-            })
-                .to('.neon', { 
-                    filter: 'brightness(1) drop-shadow(0px 0px 20px var(--primary-color))',
-                    scale: 1.1,
-                    rotation: 360,
-                    duration: 0.5,
-                    repeat: -1
-                });
-        }
-
-        if (neonContainer) {
-            neonWave();
-        }
-
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
         }
@@ -548,6 +538,7 @@
             navLinks.classList.toggle('nav-active');
         });
 
+        // Email Copy Button
         const emailButton = document.querySelector('.email');
         emailButton.addEventListener('click', () => {
             navigator.clipboard.writeText('correo@ejemplo.com')
@@ -558,6 +549,53 @@
                     }, 1500);
                 });
         });
+
+        // Active Navigation Link Handling
+        const navLinksList = document.querySelectorAll('.nav-links a');
+
+        navLinksList.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Remove active state from all links
+                navLinksList.forEach(l => l.classList.remove('active'));
+                // Add active state to current link
+                link.classList.add('active');
+                
+                // Scroll to the section
+                const sectionId = link.getAttribute('href');
+                document.querySelector(sectionId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Auto-update active link on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                if (window.scrollY >= sectionTop - (sectionHeight / 3)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinksList.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Set initial active link based on URL hash
+        const currentHash = window.location.hash;
+        if (currentHash) {
+            const currentLink = document.querySelector(`.nav-links a[href="${currentHash}"]`);
+            if (currentLink) {
+                currentLink.classList.add('active');
+            }
+        }
     </script>
 </body>
 </html>
